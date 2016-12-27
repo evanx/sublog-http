@@ -140,6 +140,6 @@ const sub = redis.createClient();
 assert(process.env.NODE_ENV);
 
 start().then(() => {}).catch(err => {
-    console.log(err);
+    console.error(err);
     end();
 }).finally(() => {});
