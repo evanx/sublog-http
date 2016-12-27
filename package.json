@@ -1,5 +1,5 @@
 {
-  "name": "sublog-web",
+  "name": "sublog-http",
   "version": "0.0.1",
   "description": "Subscribe to Redis channel and push messages to a Redis list",
   "main": "index.js",
@@ -27,10 +27,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/evanx/sublog-web.git"
+    "url": "git+https://github.com/evanx/sublog-http.git"
   },
   "bugs": {
-    "url": "https://github.com/evanx/sublog-web/issues"
+    "url": "https://github.com/evanx/sublog-http/issues"
   },
-  "homepage": "https://github.com/evanx/sublog-web#readme"
+  "homepage": "https://github.com/evanx/sublog-http#readme"
 }
