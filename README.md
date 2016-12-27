@@ -1,4 +1,4 @@
-# sub-write
+# sublog-web
 
 A microservice to subscribe to a Redis pubsub channel, and print messages to the console.
 
