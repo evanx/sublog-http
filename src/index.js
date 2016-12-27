@@ -4,6 +4,7 @@ const Promise = require('bluebird');
 const Koa = require('koa');
 const KoaRouter = require('koa-router');
 const bodyParser = require('koa-bodyparser');
+const koaJson = require('koa-json');
 
 const app = new Koa();
 const api = KoaRouter();
@@ -13,7 +14,10 @@ const config = ['subscribeChannel', 'port'].reduce((config, key) => {
     config[key] = process.env[key];
     return config;
 }, {});
-const state = {};
+
+const state = {
+    messages: []
+};
 
 const redis = require('redis');
 const client = Promise.promisifyAll(redis.createClient());
@@ -53,21 +57,19 @@ async function startProduction() {
         if (process.env.NODE_ENV !== 'production') {
             console.log({channel, message});
         }
-        handleMessage(JSON.parse(message));
+        state.messages.splice(0, 0, JSON.parse(message));
+        state.messages = state.messages.slice(0, 10);
     });
     sub.subscribe(config.subscribeChannel);
-    return startServer();
+    return startHttpServer();
 }
 
-async function handleMessage(message) {
-}
-
-async function startServer() {
-    api.get('/echo/*', async ctx => {
-        ctx.body = JSON.stringify({url: ctx.request.url});
+async function startHttpServer() {
+    api.get('/', async ctx => {
+        ctx.body = state.messages;
     });
-    app.use(bodyParser());
     app.use(api.routes());
+    app.use(koaJson());
     app.use(async ctx => {
        ctx.statusCode = 404;
     });

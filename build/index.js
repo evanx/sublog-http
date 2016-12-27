@@ -55,10 +55,11 @@ let startProduction = (() => {
             if (process.env.NODE_ENV !== 'production') {
                 console.log({ channel, message });
             }
-            handleMessage(JSON.parse(message));
+            state.messages.splice(0, 0, JSON.parse(message));
+            state.messages = state.messages.slice(0, 10);
         });
         sub.subscribe(config.subscribeChannel);
-        return startServer();
+        return startHttpServer();
     });
 
     return function startProduction() {
@@ -66,51 +67,43 @@ let startProduction = (() => {
     };
 })();
 
-let handleMessage = (() => {
-    var _ref6 = _asyncToGenerator(function* (message) {});
+let startHttpServer = (() => {
+    var _ref6 = _asyncToGenerator(function* () {
+        api.get('/', (() => {
+            var _ref7 = _asyncToGenerator(function* (ctx) {
+                ctx.body = state.messages;
+            });
 
-    return function handleMessage(_x3) {
-        return _ref6.apply(this, arguments);
-    };
-})();
-
-let startServer = (() => {
-    var _ref7 = _asyncToGenerator(function* () {
-        api.get('/echo/*', (() => {
+            return function (_x3) {
+                return _ref7.apply(this, arguments);
+            };
+        })());
+        app.use(api.routes());
+        app.use(koaJson());
+        app.use((() => {
             var _ref8 = _asyncToGenerator(function* (ctx) {
-                ctx.body = JSON.stringify({ url: ctx.request.url });
+                ctx.statusCode = 404;
             });
 
             return function (_x4) {
                 return _ref8.apply(this, arguments);
             };
         })());
-        app.use(bodyParser());
-        app.use(api.routes());
-        app.use((() => {
-            var _ref9 = _asyncToGenerator(function* (ctx) {
-                ctx.statusCode = 404;
-            });
-
-            return function (_x5) {
-                return _ref9.apply(this, arguments);
-            };
-        })());
         state.server = app.listen(config.port);
     });
 
-    return function startServer() {
-        return _ref7.apply(this, arguments);
+    return function startHttpServer() {
+        return _ref6.apply(this, arguments);
     };
 })();
 
 let end = (() => {
-    var _ref10 = _asyncToGenerator(function* () {
+    var _ref9 = _asyncToGenerator(function* () {
         client.quit();
     });
 
     return function end() {
-        return _ref10.apply(this, arguments);
+        return _ref9.apply(this, arguments);
     };
 })();
 
@@ -122,6 +115,7 @@ const Promise = require('bluebird');
 const Koa = require('koa');
 const KoaRouter = require('koa-router');
 const bodyParser = require('koa-bodyparser');
+const koaJson = require('koa-json');
 
 const app = new Koa();
 const api = KoaRouter();
@@ -131,7 +125,10 @@ const config = ['subscribeChannel', 'port'].reduce((config, key) => {
     config[key] = process.env[key];
     return config;
 }, {});
-const state = {};
+
+const state = {
+    messages: []
+};
 
 const redis = require('redis');
 const client = Promise.promisifyAll(redis.createClient());
