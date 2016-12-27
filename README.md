@@ -1,6 +1,6 @@
 # sublog-web
 
-A microservice to subscribe to a Redis pubsub channel, and print messages to the console.
+A microservice to subscribe to a Redis pubsub channel, and serve messages via HTTP.
 
 The essence of the implementation is as follows:
 ```javascript
@@ -72,12 +72,12 @@ We found that `redis-cli psubscribe` didn't suit that use case, e.g. piping to `
 
 See
 - https://github.com/evanx/sub-push - subscribe to Redis pubsub channel and transfer messages to a Redis list
+- https://github.com/evanx/sub-write - subscribe to Redis pubsub channel and write to `stdout` with optional JSON formatting
 
 We plan to publish microservices that similarly subscribe, but with purpose-built rendering for logging messages e.g. error messages coloured red.
 
 Watch
 - https://github.com/evanx/sublog-console
-- https://github.com/evanx/sublog-web
 
 ## Related code
 
