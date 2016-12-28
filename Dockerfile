@@ -1,6 +1,5 @@
-FROM mhart/alpine-node
+FROM mhart/alpine-node:base
 
-WORKDIR /src
 ADD . .
 
 CMD ["node", "build/index.js"]
