@@ -2,6 +2,43 @@
 
 A microservice to subscribe to a Redis pubsub channel, and serve messages via HTTP.
 
+## Example use case
+
+This service is intended for a personal requirement to subscribe to logging messages published via Redis.
+These are arrays published via pubsub.
+```
+redis-cli publish 'logger:mylogger' '["info", {"name": "evanx"}]'
+```
+where we might subscribe in the terminal as follows:
+```
+redis-cli psubscribe 'logger:*'
+```
+where we see the messages in the console as follows:
+```
+Reading messages... (press Ctrl-C to quit)
+1) "psubscribe"
+2) "logger:*"
+3) (integer) 1
+1) "pmessage"
+2) "logger:*"
+3) "logger:mylogger"
+4) "[\"info\", {\"name\": \"evanx\"}]"
+```
+However we want to pipe to a command-line JSON formatter to enjoy a more readable rendering:
+```json
+[
+  "info",
+  {
+    "name": "evanx"
+  }
+]
+```
+
+We found that `redis-cli psubscribe` didn't suit that use case, e.g. piping to `jq` or `python -mjson.tool` to format the JSON. See https://github.com/evanx/sub-push where we transfer messages to a list, `brpop` and then pipe to `jq`
+
+
+## Implementation
+
 The essence of the implementation is as follows:
 ```javascript
 async function startProduction() {
@@ -66,40 +103,53 @@ subscribeChannel=logger:mylogger port=8888 npm start
 ![screenshot](https://raw.githubusercontent.com/evanx/sublog-web/master/readme-images/logger-phantomjs-redis.png)
 <hr>
 
+Incidently, some sample Node code for a client logger that publishes via Redis:
+```javascript
+const createRedisLogger = (client, loggerName) =>
+['debug', 'info', 'warn', 'error'].reduce((logger, level) => {
+    logger[level] = function() {
+        if (!client || client.ended === true) { // Redis client ended
+        } else if (level === 'debug' && process.env.NODE_ENV === 'production') {
+        } else {
+            const array = [].slice.call(arguments);
+            const messageJson = JSON.stringify([
+                level,
+                ...array.map(item => {
+                    if (lodash.isError(item)) {
+                        return item.stack.split('\n').slice(0, 5);
+                    } else {
+                        return item;
+                    }
+                })
+            ]);
+            client.publish(['logger', loggerName].join(':'), messageJson);
+        }
+    };
+    return logger;
+}, {});
+```
+where the logger `level` is spliced as the head of the `arguments` array.
 
-## Sample use case
+Note that logged errors are specially handled i.e. a slice of the `stack` is logged.
 
-This service is intended for a personal requirement to subscribe to logging messages published via Redis.
-These are arrays published via pubsub.
+Later we'll publish a more sophisticated client logger with rate limiting:
+```javascript
+    const minute = new Date().getMinutes();
+    if (metric.minute !== minute) {
+        if (metric.ignored > 0) {
+            client.publish(['logger', loggerName].join(':'), ['warn', {ignored: metric.ignored}]);
+        }
+        metric.minute = minute;
+        metric.count = 0;
+        metric.ignored = 0;
+    } else {
+        metric.count++;
+        if (options.minuteLimit && metric.count > options.minuteLimit) {
+            metric.ignored++;
+            return;
+        }
+    }
 ```
-redis-cli publish 'logger:mylogger' '["info", {"name": "evanx"}]'
-```
-where we might subscribe in the terminal as follows:
-```
-redis-cli psubscribe 'logger:*'
-```
-where we see the messages in the console as follows:
-```
-Reading messages... (press Ctrl-C to quit)
-1) "psubscribe"
-2) "logger:*"
-3) (integer) 1
-1) "pmessage"
-2) "logger:*"
-3) "logger:mylogger"
-4) "[\"info\", {\"name\": \"evanx\"}]"
-```
-However we want to pipe to a command-line JSON formatter to enjoy a more readable rendering:
-```json
-[
-  "info",
-  {
-    "name": "evanx"
-  }
-]
-```
-
-We found that `redis-cli psubscribe` didn't suit that use case, e.g. piping to `jq` or `python -mjson.tool` to format the JSON. See https://github.com/evanx/sub-push where we transfer messages to a list, `brpop` and then pipe to `jq`
 
 
 ## Application container on host network
@@ -224,53 +274,3 @@ We plan to publish microservices that similarly subscribe, but with purpose-buil
 
 Watch
 - https://github.com/evanx/sublog-console
-
-## Related code
-
-Incidently, some sample Node code for a client logger that publishes via Redis:
-```javascript
-const createRedisLogger = (client, loggerName) =>
-['debug', 'info', 'warn', 'error'].reduce((logger, level) => {
-    logger[level] = function() {
-        if (!client || client.ended === true) { // Redis client ended
-        } else if (level === 'debug' && process.env.NODE_ENV === 'production') {
-        } else {
-            const array = [].slice.call(arguments);
-            const messageJson = JSON.stringify([
-                level,
-                ...array.map(item => {
-                    if (lodash.isError(item)) {
-                        return item.stack.split('\n').slice(0, 5);
-                    } else {
-                        return item;
-                    }
-                })
-            ]);
-            client.publish(['logger', loggerName].join(':'), messageJson);
-        }
-    };
-    return logger;
-}, {});
-```
-where the logger `level` is spliced as the head of the `arguments` array.
-
-Note that logged errors are specially handled i.e. a slice of the `stack` is logged.
-
-Later we'll publish a more sophisticated client logger with rate limiting:
-```javascript
-    const minute = new Date().getMinutes();
-    if (metric.minute !== minute) {
-        if (metric.ignored > 0) {
-            client.publish(['logger', loggerName].join(':'), ['warn', {ignored: metric.ignored}]);
-        }
-        metric.minute = minute;
-        metric.count = 0;
-        metric.ignored = 0;
-    } else {
-        metric.count++;
-        if (options.minuteLimit && metric.count > options.minuteLimit) {
-            metric.ignored++;
-            return;
-        }
-    }
-```
