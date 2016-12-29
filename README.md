@@ -37,6 +37,41 @@ subscribeChannel=logger:mylogger port=8888 npm start
 <hr>
 
 
+## Sample use case
+
+This service is intended for a personal requirement to subscribe to logging messages published via Redis.
+These are arrays published via pubsub.
+```
+redis-cli publish 'logger:mylogger' '["info", {"name": "evanx"}]'
+```
+where we might subscribe in the terminal as follows:
+```
+redis-cli psubscribe 'logger:*'
+```
+where we see the messages in the console as follows:
+```
+Reading messages... (press Ctrl-C to quit)
+1) "psubscribe"
+2) "logger:*"
+3) (integer) 1
+1) "pmessage"
+2) "logger:*"
+3) "logger:mylogger"
+4) "[\"info\", {\"name\": \"evanx\"}]"
+```
+However we want to pipe to a command-line JSON formatter to enjoy a more readable rendering:
+```json
+[
+  "info",
+  {
+    "name": "evanx"
+  }
+]
+```
+
+We found that `redis-cli psubscribe` didn't suit that use case, e.g. piping to `jq` or `python -mjson.tool` to format the JSON. See https://github.com/evanx/sub-push where we transfer messages to a list, `brpop` and then pipe to `jq`
+
+
 ## Application container on host network
 
 Note this apparently requires at least Docker 1.12 
@@ -95,6 +130,7 @@ e.g.
 ]
 ```
 
+
 ## Isolated Redis container and network
 
 In this example we create an isolated network:
@@ -132,8 +168,8 @@ Note that we:
 
 Get its IP address:
 ```
-myloggerHttpServer=`docker inspect 
-  --format '{{ .NetworkSettings.Networks.redis.IPAddress }}' sublog-http-mylogger`
+myloggerHttpServer=`
+  docker inspect --format '{{ .NetworkSettings.Networks.redis.IPAddress }}' sublog-http-mylogger`
 ```
 
 Print its URL: 
@@ -145,40 +181,6 @@ Curl test:
 ``` 
 curl $myloggerHttpServer:8080
 ```
-
-## Sample use case
-
-This service is intended for a personal requirement to subscribe to logging messages published via Redis.
-These are arrays published via pubsub.
-```
-redis-cli publish 'logger:mylogger' '["info", {"name": "evanx"}]'
-```
-where we might subscribe in the terminal as follows:
-```
-redis-cli psubscribe 'logger:*'
-```
-where we see the messages in the console as follows:
-```
-Reading messages... (press Ctrl-C to quit)
-1) "psubscribe"
-2) "logger:*"
-3) (integer) 1
-1) "pmessage"
-2) "logger:*"
-3) "logger:mylogger"
-4) "[\"info\", {\"name\": \"evanx\"}]"
-```
-However we want to pipe to a command-line JSON formatter to enjoy a more readable rendering:
-```json
-[
-  "info",
-  {
-    "name": "evanx"
-  }
-]
-```
-
-We found that `redis-cli psubscribe` didn't suit that use case, e.g. piping to `jq` or `python -mjson.tool` to format the JSON. See https://github.com/evanx/sub-push where we transfer messages to a list, `brpop` and then pipe to `jq`
 
 
 ## Related projects
