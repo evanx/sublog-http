@@ -50,7 +50,11 @@ Run using the host's redis instance
 docker run --network=host -e NODE_ENV=test \
   -e subscribeChannel=logger:mylogger -e port=8088 -d sublog-http:test
 ```
-where this container can be checked as follows:
+where we configure its port to `8088` to test, noting:
+- although by default the port is `8080` and that is exposed via the `Dockerfile`
+- as the network is a `host` bridge, so the reconfigured `port` is accessible on the host 
+
+This container can be checked as follows:
 - `docker ps` to see if actually started, otherwise try without `-d` to see the error.
 - `netstat -ntl` to see that a process is listening on port `8088`
 - `http://localhost:8088` via `curl` or browser
@@ -59,7 +63,28 @@ We can publish a test logging message as follows:
 ```shell
 redis-cli publish logger:mylogger '["info", "test message"]'
 ```
+HTTP fetch:
+```shell
+curl -s http://localhost:8088 | python -mjson.tool
+```
+e.g.
+```json
+[
+    [
+        "11:45",
+        "info",
+        "test message"
+    ],
+    [
+        "11:43",
+        "debug",
+        "subscribeChannel",
+        "logger:mylogger1"
+    ]
+]
+```
 
+```
 ## Isolated Redis container and network
 
 In this example we create an isolated network:
