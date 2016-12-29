@@ -59,12 +59,7 @@ We query its IP number and store in shell environment variable `loggerHost`
 ```
 loggerHost=`docker inspect --format '{{ .NetworkSettings.Networks.redis.IPAddress }}' redis-logger`
 ```
-```
-echo $loggerHost
-```
-```
-172.18.0.2
-```
+which we can debug via `echo $loggerHost` to see that set e.g. to `172.18.0.2`
 
 Finally we run our service container:
 ```shell
