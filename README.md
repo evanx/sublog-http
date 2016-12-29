@@ -16,11 +16,33 @@ async function startProduction() {
     return startHttpServer();
 }
 ```
-where `config` is populated from environment variables as follows:
+where we keep a list of the last 10 messages in reverse order by splicing incoming messages
+into the head of the array.
+
+We publish these `messages` via HTTP using Koa:
+```javascript
+async function startHttpServer() {
+    app.use(koaJson());
+    api.get('/', async ctx => {
+        ctx.body = state.messages;
+    });
+    app.use(api.routes());
+    app.use(async ctx => {
+       ctx.statusCode = 404;
+    });
+    state.server = app.listen(config.port);
+}
+```
+where we use `koa-json` middleware to format the JSON e.g. for mobile browsers without JSON formatting extensions.
+
+Note that `config` is populated from environment variables as follows:
 ```javascript
 const config = ['subscribeChannel', 'port', 'redisHost'].reduce((config, key) => {
-    assert(process.env[key] || config[key], key);
-    config[key] = process.env[key];
+    if (process.env[key]) {
+        config[key] = process.env[key];
+    } else if (!config[key]) {
+        throw new Error('config ' + key);        
+    }
     return config;
 }, {
     redisHost: '127.0.0.1'
@@ -74,7 +96,7 @@ We found that `redis-cli psubscribe` didn't suit that use case, e.g. piping to `
 
 ## Application container on host network
 
-Note this apparently requires at least Docker 1.12 
+Note this apparently requires at least Docker 1.12
 ```
 evan@dijkstra:~$ docker -v
 Docker version 1.12.1, build 23cf638
@@ -98,7 +120,7 @@ docker run --network=host -e NODE_ENV=test \
 ```
 where we configure its port to `8088` to test, noting:
 - although by default the port is `8080` and that is exposed via the `Dockerfile`
-- as the network is a `host` bridge, so the reconfigured `port` is accessible on the host 
+- as the network is a `host` bridge, so the reconfigured `port` is accessible on the host
 
 This container can be checked as follows:
 - `docker ps` to see if actually started, otherwise omit `-d` to debug.
@@ -147,7 +169,7 @@ We query its IP number and store in shell environment variable `loggerHost`
 ```
 loggerHost=`docker inspect --format '{{ .NetworkSettings.Networks.redis.IPAddress }}' redis-logger`
 ```
-which we can debug via 
+which we can debug via
 ```shell
 echo $loggerHost
 ```
@@ -163,8 +185,8 @@ where we configure `redisHost` for the `redis-logger` container via environment 
 Note that we:
 - use the `redis` isolated network bridge for the `redis-logger` container
 - configure `subscribeChannel` to `logger:mylogger` via environment variable
-- name this container `sublog-http-mylogger` 
-- use the previously built image `sublog-http:test` 
+- name this container `sublog-http-mylogger`
+- use the previously built image `sublog-http:test`
 
 Get its IP address:
 ```
@@ -173,13 +195,13 @@ myloggerHttpServer=`
 `
 ```
 
-Print its URL: 
+Print its URL:
 ```
 echo "http://$myloggerHttpServer:8080"
 ```
 
 Curl test:
-``` 
+```
 curl -s $myloggerHttpServer:8080 | python -mjson.tool
 ```
 

@@ -10,8 +10,11 @@ const app = new Koa();
 const api = KoaRouter();
 
 const config = ['subscribeChannel', 'port', 'redisHost'].reduce((config, key) => {
-    assert(process.env[key] || config[key], key);
-    config[key] = process.env[key];
+    if (process.env[key]) {
+        config[key] = process.env[key];
+    } else if (!config[key]) {
+        throw new Error('config ' + key);        
+    }
     return config;
 }, {
     redisHost: '127.0.0.1'
@@ -77,11 +80,11 @@ async function startProduction() {
 }
 
 async function startHttpServer() {
+    app.use(koaJson());
     api.get('/', async ctx => {
         ctx.body = state.messages;
     });
     app.use(api.routes());
-    app.use(koaJson());
     app.use(async ctx => {
        ctx.statusCode = 404;
     });
