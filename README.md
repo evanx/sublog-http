@@ -56,7 +56,7 @@ docker build -t sublog-http:test https://github.com/evanx/sublog-http.git
 ```
 where the image is named and tagged as `sublog-http:test`
 
-Run using the host's redis instance
+Run on host's network i.e. using the host's redis instance:
 ```shell
 docker run --network=host -e NODE_ENV=test \
   -e subscribeChannel=logger:mylogger -e port=8088 -d sublog-http:test
@@ -66,7 +66,7 @@ where we configure its port to `8088` to test, noting:
 - as the network is a `host` bridge, so the reconfigured `port` is accessible on the host 
 
 This container can be checked as follows:
-- `docker ps` to see if actually started, otherwise try without `-d` to see the error.
+- `docker ps` to see if actually started, otherwise omit `-d` to debug.
 - `netstat -ntl` to see that a process is listening on port `8088`
 - `http://localhost:8088` via `curl` or browser
 
@@ -95,7 +95,6 @@ e.g.
 ]
 ```
 
-```
 ## Isolated Redis container and network
 
 In this example we create an isolated network:
