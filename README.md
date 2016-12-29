@@ -37,13 +37,20 @@ subscribeChannel=logger:mylogger port=8888 npm start
 <hr>
 
 
-## Containers
+## Build application container 
 
-Build our service container:
+Build:
 ```shell
 docker build -t sublog-http:test https://github.com/evanx/sublog-http.git
 ```
 where the image is named and tagged as `sublog-http:test`
+
+Run:
+```shell
+docker run -p 8080 -d -e NODE_ENV=test -e subscribeChannel=logger:mylogger sublog-http:test
+```
+
+## Containers with isolated network
 
 In this example we create an isolated network:
 ```shell
@@ -72,6 +79,21 @@ where we:
 - configure `subscribeChannel` to `logger:mylogger` via environment variable
 - name this instance `sublog_http_mylogger` 
 - expose the HTTP port as port `8081` on the host 
+
+Get its IP address:
+```
+myloggerHttpServer=`docker inspect --format '{{ .NetworkSettings.Networks.redis.IPAddress }}' sublog-http-mylogger`
+```
+
+Print its URL: 
+```
+echo "http://$myloggerHttpServer:8080"
+```
+
+Curl test:
+``` 
+curl $myloggerHttpServer:8080
+```
 
 ```shell
 netstat -ntlp | grep 8081

@@ -51,11 +51,16 @@ let startDevelopment = (() => {
 
 let startProduction = (() => {
     var _ref5 = _asyncToGenerator(function* () {
+        state.messages.push([formatTime(new Date()), 'debug', 'subscribeChannel', config.subscribeChannel]);
         sub.on('message', function (channel, message) {
             if (process.env.NODE_ENV !== 'production') {
                 console.log({ channel, message });
             }
-            state.messages.splice(0, 0, JSON.parse(message));
+            const jsonMessage = JSON.parse(message);
+            if (lodash.isArray(jsonMessage)) {
+                jsonMessage.splice(0, 0, formatTime(new Date()));
+            }
+            state.messages.splice(0, 0, jsonMessage);
             state.messages = state.messages.slice(0, 10);
         });
         sub.subscribe(config.subscribeChannel);
@@ -136,6 +141,12 @@ const redis = require('redis');
 const sub = redis.createClient(6379, config.redisHost);
 
 assert(process.env.NODE_ENV);
+
+function formatTime(date) {
+    const h = date.getHours();
+    const m = date.getMinutes();
+    return ('0' + h).slice(-2) + ':' + ('0' + m).slice(-2);
+}
 
 start().then(() => {}).catch(err => {
     console.error(err);
