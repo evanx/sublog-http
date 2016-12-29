@@ -4,7 +4,6 @@ const Promise = require('bluebird');
 const Koa = require('koa');
 const KoaRouter = require('koa-router');
 const bodyParser = require('koa-bodyparser');
-const koaJson = require('koa-json');
 
 const app = new Koa();
 const api = KoaRouter();
@@ -13,7 +12,7 @@ const config = ['subscribeChannel', 'port', 'redisHost'].reduce((config, key) =>
     if (process.env[key]) {
         config[key] = process.env[key];
     } else if (!config[key]) {
-        throw new Error('config ' + key);        
+        throw new Error('config ' + key);
     }
     return config;
 }, {
@@ -80,9 +79,12 @@ async function startProduction() {
 }
 
 async function startHttpServer() {
-    app.use(koaJson());
     api.get('/', async ctx => {
-        ctx.body = state.messages;
+        if (/(Mobile|curl)/.test(ctx.get('user-agent'))) {
+            ctx.body = JSON.stringify(state.messages, null, 2);
+        } else {
+            ctx.body = state.messages;
+        }
     });
     app.use(api.routes());
     app.use(async ctx => {

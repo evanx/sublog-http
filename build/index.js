@@ -74,10 +74,13 @@ let startProduction = (() => {
 
 let startHttpServer = (() => {
     var _ref6 = _asyncToGenerator(function* () {
-        app.use(koaJson());
         api.get('/', (() => {
             var _ref7 = _asyncToGenerator(function* (ctx) {
-                ctx.body = state.messages;
+                if (/(Mobile|curl)/.test(ctx.get('user-agent'))) {
+                    ctx.body = JSON.stringify(state.messages, null, 2);
+                } else {
+                    ctx.body = state.messages;
+                }
             });
 
             return function (_x3) {
@@ -120,7 +123,6 @@ const Promise = require('bluebird');
 const Koa = require('koa');
 const KoaRouter = require('koa-router');
 const bodyParser = require('koa-bodyparser');
-const koaJson = require('koa-json');
 
 const app = new Koa();
 const api = KoaRouter();

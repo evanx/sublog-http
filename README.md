@@ -22,9 +22,12 @@ into the head of the array.
 We publish these `messages` via HTTP using Koa:
 ```javascript
 async function startHttpServer() {
-    app.use(koaJson());
     api.get('/', async ctx => {
-        ctx.body = state.messages;
+        if (/(Mobile|curl)/.test(ctx.get('user-agent'))) {
+            ctx.body = JSON.stringify(state.messages, null, 2);
+        } else {
+            ctx.body = state.messages;
+        }
     });
     app.use(api.routes());
     app.use(async ctx => {
@@ -33,7 +36,12 @@ async function startHttpServer() {
     state.server = app.listen(config.port);
 }
 ```
-where we use `koa-json` middleware to format the JSON e.g. for mobile browsers without JSON formatting extensions.
+where we format the JSON for mobile browsers i.e. without JSON formatting extensions.
+```
+evans@eowyn:~$ curl -s -I localhost:8081
+HTTP/1.1 200 OK
+Content-Type: text/plain; charset=utf-8
+```
 
 Note that `config` is populated from environment variables as follows:
 ```javascript
