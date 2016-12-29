@@ -227,7 +227,7 @@ where the logger `level` is spliced as the head of the `arguments` array.
 Note that logged errors are specially handled i.e. a slice of the `stack` is logged.
 
 Later we'll publish a more sophisticated client logger with rate limiting:
-```
+```javascript
     const minute = new Date().getMinutes();
     if (metric.minute !== minute) {
         if (metric.ignored > 0) {
