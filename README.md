@@ -38,7 +38,7 @@ async function startHttpServer() {
 ```
 where we format the JSON for mobile browsers i.e. without JSON formatting extensions.
 ```
-evans@eowyn:~$ curl -s -I localhost:8081
+evans@eowyn:~$ curl -s -I localhost:8080
 HTTP/1.1 200 OK
 Content-Type: text/plain; charset=utf-8
 ```
