@@ -180,7 +180,7 @@ echo "http://$myloggerHttpServer:8080"
 
 Curl test:
 ``` 
-curl $myloggerHttpServer:8080 | python -mjson.tool
+curl -s $myloggerHttpServer:8080 | python -mjson.tool
 ```
 
 
