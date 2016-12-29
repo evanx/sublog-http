@@ -47,7 +47,8 @@ where the image is named and tagged as `sublog-http:test`
 
 Run using the host's redis instance
 ```shell
-docker run --network=host -e NODE_ENV=test -e subscribeChannel=logger:mylogger -e port=8088 -d sublog-http:test
+docker run --network=host -e NODE_ENV=test \
+  -e subscribeChannel=logger:mylogger -e port=8088 -d sublog-http:test
 ```
 where this container can be checked as follows:
 - `docker ps` to see if actually started, otherwise try without `-d` to see the error.
