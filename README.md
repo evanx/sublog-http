@@ -2,7 +2,7 @@
 
 A microservice to subscribe to a Redis pubsub channel, and serve messages via HTTP.
 
-## Example use case
+## Example problem description
 
 This service is intended for a personal requirement to subscribe to logging messages published via Redis.
 These are arrays published via pubsub.
