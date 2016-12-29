@@ -1,4 +1,4 @@
-# sublog-web
+# sublog-http
 
 A microservice to subscribe to a Redis pubsub channel, and serve messages via HTTP.
 
