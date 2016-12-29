@@ -18,12 +18,15 @@ async function startProduction() {
 ```
 where `config` is populated from environment variables as follows:
 ```javascript
-const config = ['subscribeChannel', 'port'].reduce((config, key) => {
-    assert(process.env[key], key);
-    config[key] = process.env[key];    
+const config = ['subscribeChannel', 'port', 'redisHost'].reduce((config, key) => {
+    assert(process.env[key] || config[key], key);
+    config[key] = process.env[key];
     return config;
-}, {});
+}, {
+    redisHost: '127.0.0.1'
+});
 ```
+where we default `redisHost` to `localhost`
 
 For example the following command line runs this service to subscribe to channel `logger:mylogger` and serve the JSON messages via port `8888`
 ```shell
@@ -32,6 +35,52 @@ subscribeChannel=logger:mylogger port=8888 npm start
 
 ![screenshot](https://raw.githubusercontent.com/evanx/sublog-web/master/readme-images/logger-phantomjs-redis.png)
 <hr>
+
+
+## Containers
+
+Build our service container:
+```shell
+docker build -t sublog-http:test https://github.com/evanx/sublog-http.git
+```
+where the image is named and tagged as `sublog-http:test`
+
+In this example we create an isolated network:
+```shell
+docker network create --driver bridge redis
+```
+
+We can create a Redis container named `redis-logger` as follows
+```shell
+docker run --network=redis --name redis-logger -d redis
+```
+
+We query its IP number and store in shell environment variable `loggerHost`
+```
+loggerHost=`docker inspect --format '{{ .NetworkSettings.Networks.redis.IPAddress }}' redis-logger`
+```
+```
+echo $loggerHost
+```
+```
+172.18.0.2
+```
+
+Finally we run our service container:
+```shell
+docker run --network=redis -p 8081 -d --name sublog-http-mylogger \
+  -e NODE_ENV=test -e redisHost=$loggerHost -e subscribeChannel=logger:mylogger sublog-http:test
+```
+where we:
+- use the previously built image `sublog_http:test` 
+- use the `redis-logger-network` bridge for the `redis_logger` container
+- configure `subscribeChannel` to `logger:mylogger` via environment variable
+- name this instance `sublog_http_mylogger` 
+- expose the HTTP port as port `8081` on the host 
+
+```shell
+netstat -ntlp | grep 8081
+```
 
 ## Sample use case
 

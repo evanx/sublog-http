@@ -99,7 +99,7 @@ let startHttpServer = (() => {
 
 let end = (() => {
     var _ref9 = _asyncToGenerator(function* () {
-        client.quit();
+        sub.quit();
     });
 
     return function end() {
@@ -120,19 +120,20 @@ const koaJson = require('koa-json');
 const app = new Koa();
 const api = KoaRouter();
 
-const config = ['subscribeChannel', 'port'].reduce((config, key) => {
-    assert(process.env[key], key);
+const config = ['subscribeChannel', 'port', 'redisHost'].reduce((config, key) => {
+    assert(process.env[key] || config[key], key);
     config[key] = process.env[key];
     return config;
-}, {});
+}, {
+    redisHost: '127.0.0.1'
+});
 
 const state = {
     messages: []
 };
 
 const redis = require('redis');
-const client = Promise.promisifyAll(redis.createClient());
-const sub = redis.createClient();
+const sub = redis.createClient(6379, config.redisHost);
 
 assert(process.env.NODE_ENV);
 
