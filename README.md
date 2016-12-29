@@ -169,7 +169,8 @@ Note that we:
 Get its IP address:
 ```
 myloggerHttpServer=`
-  docker inspect --format '{{ .NetworkSettings.Networks.redis.IPAddress }}' sublog-http-mylogger`
+  docker inspect --format '{{ .NetworkSettings.Networks.redis.IPAddress }}' sublog-http-mylogger
+`
 ```
 
 Print its URL: 
