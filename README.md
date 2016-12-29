@@ -37,7 +37,7 @@ subscribeChannel=logger:mylogger port=8888 npm start
 <hr>
 
 
-## Build application container 
+## Application container on host network
 
 Build:
 ```shell
@@ -45,12 +45,21 @@ docker build -t sublog-http:test https://github.com/evanx/sublog-http.git
 ```
 where the image is named and tagged as `sublog-http:test`
 
-Run:
+Run using the host's redis instance
 ```shell
-docker run -p 8080 -d -e NODE_ENV=test -e subscribeChannel=logger:mylogger sublog-http:test
+docker run --network=host -e NODE_ENV=test -e subscribeChannel=logger:mylogger -e port=8088 -d sublog-http:test
+```
+where this container can be checked as follows:
+- `docker ps` to see if actually started, otherwise try without `-d` to see the error.
+- `netstat -ntl` to see that a process is listening on port `8088`
+- `http://localhost:8088` via `curl` or browser
+
+We can publish a test logging message as follows:
+```shell
+redis-cli publish logger:mylogger '["info", "test message"]'
 ```
 
-## Containers with isolated network
+## Isolated Redis container and network
 
 In this example we create an isolated network:
 ```shell
@@ -70,15 +79,15 @@ which we can debug via `echo $loggerHost` to see that set e.g. to `172.18.0.2`
 
 Finally we run our service container:
 ```shell
-docker run --network=redis -p 8081 -d --name sublog-http-mylogger \
-  -e NODE_ENV=test -e redisHost=$loggerHost -e subscribeChannel=logger:mylogger sublog-http:test
+docker run --network=redis --name sublog-http-mylogger \
+  -e NODE_ENV=test -e redisHost=$loggerHost -e subscribeChannel=logger:mylogger -d sublog-http:test
 ```
 where we:
-- use the previously built image `sublog_http:test` 
-- use the `redis-logger-network` bridge for the `redis_logger` container
-- configure `subscribeChannel` to `logger:mylogger` via environment variable
+- use the `redis` isolated network bridge for the `redis_logger` container
 - name this instance `sublog_http_mylogger` 
-- expose the HTTP port as port `8081` on the host 
+- configure `subscribeChannel` to `logger:mylogger` via environment variable
+- configure `redisHost` for the `redis-logger` container via environment variable
+- use the previously built image `sublog_http:test` 
 
 Get its IP address:
 ```
@@ -93,10 +102,6 @@ echo "http://$myloggerHttpServer:8080"
 Curl test:
 ``` 
 curl $myloggerHttpServer:8080
-```
-
-```shell
-netstat -ntlp | grep 8081
 ```
 
 ## Sample use case
