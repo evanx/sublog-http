@@ -122,12 +122,13 @@ Finally we run our service container:
 docker run --network=redis --name sublog-http-mylogger \
   -e NODE_ENV=test -e redisHost=$loggerHost -e subscribeChannel=logger:mylogger -d sublog-http:test
 ```
-where we:
-- use the `redis` isolated network bridge for the `redis_logger` container
-- name this instance `sublog_http_mylogger` 
+where we configure `redisHost` for the `redis-logger` container via environment variable.
+
+Note that we:
+- use the `redis` isolated network bridge for the `redis-logger` container
 - configure `subscribeChannel` to `logger:mylogger` via environment variable
-- configure `redisHost` for the `redis-logger` container via environment variable
-- use the previously built image `sublog_http:test` 
+- name this container `sublog-http-mylogger` 
+- use the previously built image `sublog-http:test` 
 
 Get its IP address:
 ```
