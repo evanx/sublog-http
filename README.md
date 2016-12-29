@@ -36,6 +36,9 @@ However we want to pipe to a command-line JSON formatter to enjoy a more readabl
 
 We found that `redis-cli psubscribe` didn't suit that use case, e.g. piping to `jq` or `python -mjson.tool` to format the JSON. See https://github.com/evanx/sub-push where we transfer messages to a list, `brpop` and then pipe to `jq`
 
+However it seemed like a good idea to use a browser to render the logging messages, even for local viewing,
+which prompted the development of this `sublog-http` service.
+
 
 ## Implementation
 
