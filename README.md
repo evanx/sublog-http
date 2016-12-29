@@ -90,7 +90,7 @@ e.g.
         "11:43",
         "debug",
         "subscribeChannel",
-        "logger:mylogger1"
+        "logger:mylogger"
     ]
 ]
 ```
