@@ -39,7 +39,18 @@ subscribeChannel=logger:mylogger port=8888 npm start
 
 ## Application container on host network
 
-Build:
+Note this apparently requires at least Docker 1.12 
+```
+evan@dijkstra:~$ docker -v
+Docker version 1.12.1, build 23cf638
+```
+e.g. on Ubuntu 16.04:
+```
+evan@dijkstra:~/sublog-http$ cat /etc/issue
+Ubuntu 16.04.1 LTS \n \l
+```
+
+Build our application container:
 ```shell
 docker build -t sublog-http:test https://github.com/evanx/sublog-http.git
 ```
