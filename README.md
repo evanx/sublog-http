@@ -293,7 +293,8 @@ then
   sublogContainer=`docker ps | grep sublog-http:test | head -1 | cut -f1 -d' '`
   if [ -n "$sublogContainer" ]
   then
-    sublogHost=`docker inspect --format '{{ .NetworkSettings.Networks.bridge.IPAddress }}' $sublogContainer`
+    sublogHost=`
+      docker inspect --format '{{ .NetworkSettings.Networks.bridge.IPAddress }}' $sublogContainer`
     echo $sublogHost
     curl -s http://$sublogHost:8080 | python -mjson.tool
     docker kill $sublogContainer
