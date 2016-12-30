@@ -256,16 +256,24 @@ where `redisHost` is the IP number of the Redis instance to which the container 
 Note that it cannot be `localhost` as the context is the container which is running the HTTP service only.
 Nor can it be omitted as `localhost` is the default Redis host used by this service.
 
-Note that in this case the port will be the `8080` default configured and exposed in the `Dockerfile`
+We publish a test message as follows:
+```shell
+redis-cli -h $redisHost publish logger:mylogger '["info", "test message"]'
+```
+where naturally we must specify the same `redisHost` to which the service connects
+i.e. not the default `localhost` unless its external IP number was provided to the service,
+and even then rather use that to test.
 
 Get container ID, IP address, and curl:
 ```shell
 sublogContainer=`docker ps | grep sublog-http:test | head -1 | cut -f1 -d' '`
 sublogHost=`docker inspect --format '{{ .NetworkSettings.Networks.bridge.IPAddress }}' $sublogContainer`
 echo $sublogHost
-redis-cli -h $redisHost publish logger:mylogger '["info", "test message"]'
 curl -s http://$sublogHost:8080 | python -mjson.tool
 ```
+
+Note that in this case the port will be the `8080` default configured and exposed in the `Dockerfile`
+
 
 ## Isolated Redis container and network
 
