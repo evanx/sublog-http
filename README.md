@@ -159,24 +159,46 @@ Later we'll publish a more sophisticated client logger with rate limiting:
 ```
 
 
-## Application container on host network
+## Docker notes
 
-Note this apparently requires at least Docker 1.12
+This tested on Docker 1.12 (Ubuntu 16.04) and 1.11 (Amazon Linux 2016.09)
 ```
-evan@dijkstra:~$ docker -v
+docker -v
+```
+
+```
 Docker version 1.12.1, build 23cf638
 ```
-e.g. on Ubuntu 16.04:
+
 ```
-evan@dijkstra:~/sublog-http$ cat /etc/issue
+Docker version 1.11.2, build b9f10c9/1.11.2
+```
+
+```
+cat /etc/issue
+```
+```
 Ubuntu 16.04.1 LTS \n \l
 ```
 
-Build our application container:
+```
+Amazon Linux AMI release 2016.09
+```
+
+### Build application container
+
+Let's build our application container:
 ```shell
 docker build -t sublog-http:test https://github.com/evanx/sublog-http.git
 ```
 where the image is named and tagged as `sublog-http:test`
+
+Alternatively `git clone` and `npm install` and build from local dir:
+```shell
+git clone https://github.com/evanx/sublog-http.git &&
+  cd sublog-http && npm install && 
+  docker build -t sublog-http:test  .
+```
 
 Run on host's network i.e. using the host's redis instance:
 ```shell
@@ -192,6 +214,22 @@ This container can be checked as follows:
 - `netstat -ntl` to see that a process is listening on port `8088`
 - `http://localhost:8088` via `curl` or browser
 
+Alternatively for Docker 1.11 without `--network=host` but configuring a `redisHost` IP number:
+```shell
+docker run -e NODE_ENV=test -e subscribeChannel=logger:mylogger -e redisHost=$redisHost -d sublog-http:test
+```
+where `redisHost` is the IP number of the Redis instance to which the container should connect.
+
+Get container ID:
+```
+sublogContainer=`docker ps | grep sublog-http:test | head -1 | cut -f1 -d' '`
+```
+
+Get container IP number:
+```
+sublogHost=`docker inspect --format '{{ .NetworkSettings.Networks.bridge.IPAddress }}' $sublogContainer`
+```
+
 We can publish a test logging message as follows:
 ```shell
 redis-cli publish logger:mylogger '["info", "test message"]'
@@ -200,7 +238,11 @@ HTTP fetch:
 ```shell
 curl -s http://localhost:8088 | python -mjson.tool
 ```
-e.g.
+Or if not using `--network=host` then the container's IP number:
+```
+curl -s http://$sublogHost:8080 | python -mjson.tool
+```
+Sample output:
 ```json
 [
     [
