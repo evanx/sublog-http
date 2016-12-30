@@ -56,9 +56,7 @@ async function startDevelopment() {
 }
 
 function formatTime(date) {
-  const h = date.getHours();
-  const m = date.getMinutes();
-  return ('0' + h).slice(-2) + ':' + ('0' + m).slice(-2);
+  return [date.getHours(), date.getMinutes(), date.getSeconds()].map(v => ('0' + v).slice(-2)).join(':');
 }
 
 async function startProduction() {

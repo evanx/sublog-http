@@ -274,6 +274,26 @@ curl -s http://$sublogHost:8080 | python -mjson.tool
 
 Note that in this case the port will be the `8080` default configured and exposed in the `Dockerfile`
 
+Incidently we can kill the container as follows:
+```shell
+sublogContainer=`docker ps | grep sublog-http:test | head -1 | cut -f1 -d' '`
+[ -n "$sublogContainer" ] && docker kill $sublogContainer
+```
+
+Altogether:
+```shell
+sublogContainer=`docker ps | grep sublog-http:test | head -1 | cut -f1 -d' '`
+[ -n "$sublogContainer" ] && docker kill $sublogContainer
+docker run -e NODE_ENV=test -e subscribeChannel=logger:mylogger \
+  -e redisHost=$redisHost -d sublog-http:test
+sublogContainer=`docker ps | grep sublog-http:test | head -1 | cut -f1 -d' '`
+sublogHost=`docker inspect --format '{{ .NetworkSettings.Networks.bridge.IPAddress }}' $sublogContainer`
+echo $sublogHost
+redis-cli -h $redisHost publish logger:mylogger '["info", "test message"]'
+sleep .25
+curl -s http://$sublogHost:8080 | python -mjson.tool
+docker kill $sublogContainer
+```
 
 ## Isolated Redis container and network
 

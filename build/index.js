@@ -148,9 +148,7 @@ const sub = redis.createClient(6379, config.redisHost);
 assert(process.env.NODE_ENV);
 
 function formatTime(date) {
-    const h = date.getHours();
-    const m = date.getMinutes();
-    return ('0' + h).slice(-2) + ':' + ('0' + m).slice(-2);
+    return [date.getHours(), date.getMinutes(), date.getSeconds()].map(v => ('0' + v).slice(-2)).join(':');
 }
 
 start().then(() => {}).catch(err => {
