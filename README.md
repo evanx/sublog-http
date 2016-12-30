@@ -188,6 +188,15 @@ git clone https://github.com/evanx/sublog-http.git &&
   cd sublog-http && npm install &&
   docker build -t sublog-http:test .
 ```
+where the default `Dockerfile` is as follows:
+```
+FROM mhart/alpine-node
+ADD . .
+RUN npm install
+ENV port 8080
+EXPOSE 8080
+CMD ["node", "build/index.js"]
+```
 
 Using the latest Docker version or 1.12, run on host's network i.e. using the host's redis instance:
 ```shell
