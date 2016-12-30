@@ -10,11 +10,11 @@ const api = KoaRouter();
 
 const config = ['subscribeChannel', 'port', 'redisHost'].reduce((config, key) => {
     if (process.env[key] === '') {
-        throw new Error('config ' + key);
+        throw new Error('empty config ' + key);
     } else if (process.env[key]) {
         config[key] = process.env[key];
     } else if (!config[key]) {
-        throw new Error('config ' + key);
+        throw new Error('missing config ' + key);
     }
     return config;
 }, {
@@ -58,7 +58,7 @@ async function startDevelopment() {
 }
 
 function formatTime(date) {
-  return [date.getHours(), date.getMinutes(), date.getSeconds()].map(v => ('0' + v).slice(-2)).join(':');
+    return [date.getHours(), date.getMinutes(), date.getSeconds()].map(v => ('0' + v).slice(-2)).join(':');
 }
 
 async function startProduction() {
@@ -88,7 +88,7 @@ async function startHttpServer() {
     });
     app.use(api.routes());
     app.use(async ctx => {
-       ctx.statusCode = 404;
+        ctx.statusCode = 404;
     });
     state.server = app.listen(config.port);
 }

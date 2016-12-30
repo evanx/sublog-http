@@ -129,11 +129,11 @@ const api = KoaRouter();
 
 const config = ['subscribeChannel', 'port', 'redisHost'].reduce((config, key) => {
     if (process.env[key] === '') {
-        throw new Error('config ' + key);
+        throw new Error('empty config ' + key);
     } else if (process.env[key]) {
         config[key] = process.env[key];
     } else if (!config[key]) {
-        throw new Error('config ' + key);
+        throw new Error('missing config ' + key);
     }
     return config;
 }, {

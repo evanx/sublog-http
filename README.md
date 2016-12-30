@@ -90,10 +90,12 @@ Content-Type: text/plain; charset=utf-8
 Note that `config` is populated from environment variables as follows:
 ```javascript
 const config = ['subscribeChannel', 'port', 'redisHost'].reduce((config, key) => {
-    if (process.env[key]) {
+    if (process.env[key] === '') {
+        throw new Error('empty config ' + key);
+    } else if (process.env[key]) {
         config[key] = process.env[key];
     } else if (!config[key]) {
-        throw new Error('config ' + key);        
+        throw new Error('missing config ' + key);
     }
     return config;
 }, {
@@ -101,6 +103,8 @@ const config = ['subscribeChannel', 'port', 'redisHost'].reduce((config, key) =>
 });
 ```
 where we default `redisHost` to `localhost`
+
+Note that we check that an environment variable is not empty, for safety sake.
 
 For example the following command line runs this service to subscribe to channel `logger:mylogger` and serve the JSON messages via port `8888`
 ```shell
