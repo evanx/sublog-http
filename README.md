@@ -282,18 +282,23 @@ sublogContainer=`docker ps | grep sublog-http:test | head -1 | cut -f1 -d' '`
 
 Altogether:
 ```shell
-echo "redisHost ${redisHost-UNDEFINED}"
-sublogContainer=`docker ps | grep sublog-http:test | head -1 | cut -f1 -d' '`
-[ -n "$sublogContainer" ] && docker kill $sublogContainer
-docker run -e NODE_ENV=test -e subscribeChannel=logger:mylogger \
-  -e redisHost=$redisHost -d sublog-http:test
-sublogContainer=`docker ps | grep sublog-http:test | head -1 | cut -f1 -d' '`
-sublogHost=`docker inspect --format '{{ .NetworkSettings.Networks.bridge.IPAddress }}' $sublogContainer`
-echo $sublogHost
-redis-cli -h $redisHost publish logger:mylogger '["info", "test message"]'
-sleep 1
-curl -s http://$sublogHost:8080 | python -mjson.tool
-docker kill $sublogContainer
+if [ -n "$redisHost" ]
+then
+  sublogContainer=`docker ps | grep sublog-http:test | head -1 | cut -f1 -d' '`
+  [ -n "$sublogContainer" ] && docker kill $sublogContainer
+  docker run -e NODE_ENV=test -e subscribeChannel=logger:mylogger \
+    -e redisHost=$redisHost -d sublog-http:test
+  sleep 1
+  redis-cli -h $redisHost publish logger:mylogger '["info", "test message"]'
+  sublogContainer=`docker ps | grep sublog-http:test | head -1 | cut -f1 -d' '`
+  if [ -n "$sublogContainer" ]
+  then
+    sublogHost=`docker inspect --format '{{ .NetworkSettings.Networks.bridge.IPAddress }}' $sublogContainer`
+    echo $sublogHost
+    curl -s http://$sublogHost:8080 | python -mjson.tool
+    docker kill $sublogContainer
+  fi
+fi
 ```
 
 ## Isolated Redis container and network
