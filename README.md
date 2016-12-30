@@ -278,10 +278,10 @@ curl -s http://$sublogHost:8080 | python -mjson.tool
 
 Note that in this case the port will be the `8080` default configured and exposed in the `Dockerfile`
 
-Incidently we can kill the container as follows:
+Incidently we can kill all containers by our image name as follows:
 ```shell
-sublogContainer=`docker ps -q -f ancestor=sublog-http:test | head -1`
-[ -n "$sublogContainer" ] && docker kill $sublogContainer
+ids=`docker ps -q -f ancestor=sublog-http:test`
+[ -n "$ids" ] && docker kill $ids
 ```
 
 Altogether:
