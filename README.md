@@ -294,7 +294,7 @@ then
     -e redisHost=$redisHost -d sublog-http:test
   sleep 1
   redis-cli -h $redisHost publish logger:mylogger '["info", "test message"]'
-  sublogContainer=`docker ps -q -f ancestor=sublog-http:test | head -1`
+  sublogContainer=`docker ps -q -f ancestor=sublog-http:test`
   if [ -n "$sublogContainer" ]
   then
     sublogHost=`
