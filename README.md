@@ -165,25 +165,14 @@ This tested on Docker 1.12 (Ubuntu 16.04) and 1.11 (Amazon Linux 2016.09)
 ```
 docker -v
 ```
-
-```
-Docker version 1.12.1, build 23cf638
-```
-
-```
-Docker version 1.11.2, build b9f10c9/1.11.2
-```
+- `Docker version 1.12.1, build 23cf638`
+- `Docker version 1.11.2, build b9f10c9/1.11.2`
 
 ```
 cat /etc/issue
 ```
-```
-Ubuntu 16.04.1 LTS \n \l
-```
-
-```
-Amazon Linux AMI release 2016.09
-```
+- `Ubuntu 16.04.1 LTS`
+- `Amazon Linux AMI release 2016.09`
 
 ### Build application container
 
