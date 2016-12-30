@@ -128,7 +128,9 @@ const app = new Koa();
 const api = KoaRouter();
 
 const config = ['subscribeChannel', 'port', 'redisHost'].reduce((config, key) => {
-    if (process.env[key]) {
+    if (process.env[key] === '') {
+        throw new Error('config ' + key);
+    } else if (process.env[key]) {
         config[key] = process.env[key];
     } else if (!config[key]) {
         throw new Error('config ' + key);
