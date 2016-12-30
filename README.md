@@ -253,8 +253,8 @@ docker run -e NODE_ENV=test -e subscribeChannel=logger:mylogger \
 ```
 where `redisHost` is the IP number of the Redis instance to which the container should connect.
 
-Note that it cannot be `localhost` as that is the container which is running the HTTP service only.
-Nor can it be omitted as `localhost` is the default.
+Note that it cannot be `localhost` as the context is the container which is running the HTTP service only.
+Nor can it be omitted as `localhost` is the default Redis host used by this service.
 
 Note that in this case the port will be the `8080` default configured and exposed in the `Dockerfile`
 
