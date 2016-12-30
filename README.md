@@ -282,6 +282,7 @@ sublogContainer=`docker ps | grep sublog-http:test | head -1 | cut -f1 -d' '`
 
 Altogether:
 ```shell
+echo "redisHost ${redisHost-UNDEFINED}"
 sublogContainer=`docker ps | grep sublog-http:test | head -1 | cut -f1 -d' '`
 [ -n "$sublogContainer" ] && docker kill $sublogContainer
 docker run -e NODE_ENV=test -e subscribeChannel=logger:mylogger \
