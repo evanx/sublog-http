@@ -205,7 +205,8 @@ This container can be checked as follows:
 
 Alternatively for Docker 1.11 without `--network=host` but configuring a `redisHost` IP number:
 ```shell
-docker run -e NODE_ENV=test -e subscribeChannel=logger:mylogger -e redisHost=$redisHost -d sublog-http:test
+docker run -e NODE_ENV=test -e subscribeChannel=logger:mylogger \
+  -e redisHost=$redisHost -d sublog-http:test
 ```
 where `redisHost` is the IP number of the Redis instance to which the container should connect.
 
