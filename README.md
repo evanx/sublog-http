@@ -182,11 +182,11 @@ docker build -t sublog-http:test https://github.com/evanx/sublog-http.git
 ```
 where the image is named and tagged as `sublog-http:test`
 
-Alternatively `git clone` and `npm install` and build from local dir:
+Alternatively `git clone` and `npm install` and build from local dir e.g. if you wish to modify the `Dockerfile`
 ```shell
 git clone https://github.com/evanx/sublog-http.git &&
-  cd sublog-http && npm install && 
-  docker build -t sublog-http:test  .
+  cd sublog-http && npm install &&
+  docker build -t sublog-http:test .
 ```
 
 Using the latest Docker version or 1.12, run on host's network i.e. using the host's redis instance:
