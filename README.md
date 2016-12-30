@@ -48,7 +48,7 @@ which prompted the development of this `sublog-http` service.
 
 The essence of the implementation is as follows:
 ```javascript
-async function startProduction() {
+async function start() {
     sub.on('message', (channel, message) => {
         if (process.env.NODE_ENV !== 'production') {
             console.log({channel, message});
