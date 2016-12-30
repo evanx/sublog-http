@@ -189,7 +189,7 @@ git clone https://github.com/evanx/sublog-http.git &&
   docker build -t sublog-http:test  .
 ```
 
-Run on host's network i.e. using the host's redis instance:
+Using the latest Docker version or 1.12, run on host's network i.e. using the host's redis instance:
 ```shell
 docker run --network=host -e NODE_ENV=test \
   -e subscribeChannel=logger:mylogger -e port=8088 -d sublog-http:test
@@ -208,6 +208,8 @@ Alternatively for Docker 1.11 without `--network=host` but configuring a `redisH
 docker run -e NODE_ENV=test -e subscribeChannel=logger:mylogger -e redisHost=$redisHost -d sublog-http:test
 ```
 where `redisHost` is the IP number of the Redis instance to which the container should connect.
+
+Note that in this case the port will be the `8080` default configured and exposed in the `Dockerfile`
 
 Get container ID:
 ```
