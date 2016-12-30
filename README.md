@@ -198,6 +198,8 @@ EXPOSE 8080
 CMD ["node", "build/index.js"]
 ```
 
+### Host network
+
 Using the latest Docker version or 1.12, run on host's network i.e. using the host's redis instance:
 ```shell
 docker run --network=host -e NODE_ENV=test \
@@ -212,24 +214,7 @@ This container can be checked as follows:
 - `netstat -ntl` to see that a process is listening on port `8088`
 - `http://localhost:8088` via `curl` or browser
 
-Alternatively for Docker 1.11 without `--network=host` but configuring a `redisHost` IP number:
-```shell
-docker run -e NODE_ENV=test -e subscribeChannel=logger:mylogger \
-  -e redisHost=$redisHost -d sublog-http:test
-```
-where `redisHost` is the IP number of the Redis instance to which the container should connect.
-
-Note that in this case the port will be the `8080` default configured and exposed in the `Dockerfile`
-
-Get container ID:
-```
-sublogContainer=`docker ps | grep sublog-http:test | head -1 | cut -f1 -d' '`
-```
-
-Get container IP number:
-```
-sublogHost=`docker inspect --format '{{ .NetworkSettings.Networks.bridge.IPAddress }}' $sublogContainer`
-```
+#### Test message
 
 We can publish a test logging message as follows:
 ```shell
@@ -239,10 +224,7 @@ HTTP fetch:
 ```shell
 curl -s http://localhost:8088 | python -mjson.tool
 ```
-Or if not using `--network=host` then the container's IP number:
-```
-curl -s http://$sublogHost:8080 | python -mjson.tool
-```
+
 Sample output:
 ```json
 [
@@ -260,6 +242,28 @@ Sample output:
 ]
 ```
 
+### Bridge network
+
+Alternatively for Docker 1.11 without `--network=host` but configuring a `redisHost` IP number:
+```shell
+docker run -e NODE_ENV=test -e subscribeChannel=logger:mylogger \
+  -e redisHost=$redisHost -d sublog-http:test
+```
+where `redisHost` is the IP number of the Redis instance to which the container should connect.
+
+Note that it cannot be `localhost` as that is the container which is running the HTTP service only.
+Nor can it be omitted as `localhost` is the default.
+
+Note that in this case the port will be the `8080` default configured and exposed in the `Dockerfile`
+
+Get container ID, IP address, and curl:
+```shell
+sublogContainer=`docker ps | grep sublog-http:test | head -1 | cut -f1 -d' '`
+sublogHost=`docker inspect --format '{{ .NetworkSettings.Networks.bridge.IPAddress }}' $sublogContainer`
+echo $sublogHost
+redis-cli -h $redisHost publish logger:mylogger '["info", "test message"]'
+curl -s http://$sublogHost:8080 | python -mjson.tool
+```
 
 ## Isolated Redis container and network
 
