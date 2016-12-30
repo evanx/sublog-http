@@ -198,9 +198,9 @@ EXPOSE 8080
 CMD ["node", "build/index.js"]
 ```
 
-### Host network
+### Run on host network
 
-Using the latest Docker version or 1.12, run on host's network i.e. using the host's redis instance:
+Using the latest Docker version or 1.12, we run on the host's network i.e. using the host's Redis instance:
 ```shell
 docker run --network=host -e NODE_ENV=test \
   -e subscribeChannel=logger:mylogger -e port=8088 -d sublog-http:test
@@ -213,6 +213,8 @@ This container can be checked as follows:
 - `docker ps` to see if actually started, otherwise omit `-d` to debug.
 - `netstat -ntl` to see that a process is listening on port `8088`
 - `http://localhost:8088` via `curl` or browser
+
+Ensure that Redis is running on the host i.e. `localhost` port `6379`
 
 #### Test message
 
