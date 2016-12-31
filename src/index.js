@@ -81,7 +81,7 @@ async function startProduction() {
 async function startHttpServer() {
     api.get('/', async ctx => {
         if (/(Mobile|curl)/.test(ctx.get('user-agent'))) {
-            ctx.body = JSON.stringify(state.messages, null, 2);
+            ctx.body = JSON.stringify(state.messages, null, 2) + '\n';
         } else {
             ctx.body = state.messages;
         }
