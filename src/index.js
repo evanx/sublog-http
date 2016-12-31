@@ -36,7 +36,7 @@ async function multiExecAsync(client, multiFunction) {
     return Promise.promisify(multi.exec).call(multi);
 }
 
-async function start() {
+(async function() {
     state.started = Math.floor(Date.now()/1000);
     state.pid = process.pid;
     console.log('start', {config, state});
@@ -47,7 +47,7 @@ async function start() {
     } else {
         return startProduction();
     }
-}
+}());
 
 async function startTest() {
     return startProduction();
@@ -97,9 +97,3 @@ async function end() {
     sub.quit();
 }
 
-start().then(() => {
-}).catch(err => {
-    console.error(err);
-    end();
-}).finally(() => {
-});
