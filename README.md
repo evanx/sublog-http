@@ -195,12 +195,15 @@ git clone https://github.com/evanx/sublog-http.git &&
 where the default `Dockerfile` is as follows:
 ```
 FROM mhart/alpine-node
-ADD . .
+ADD package.json .
 RUN npm install
+ADD src .
 ENV port 8080
 EXPOSE 8080
-CMD ["node", "build/index.js"]
+CMD ["node", "--harmony-async-await", "src/index.js"]
 ```
+where we `ADD package.json` and `RUN npm install` first before `ADD src` - so that if the source has changed but not `package.json` then the cached intermediate image after `npm install` is stil usable for a fast rebuild.
+
 
 ### Run on host network
 
